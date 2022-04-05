@@ -32,6 +32,7 @@ void OvQt3DWindow::keyPressEvent(QKeyEvent *event)
         case Qt::Key_C:Player_Controll=1;break;
         case Qt::Key_W:Player_Accelerate=1;break;
         case Qt::Key_S:Player_Accelerate=-1;break;
+        case Qt::Key_Space:Player_Shoot=1;break;
 
     }
 }

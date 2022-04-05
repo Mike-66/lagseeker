@@ -2,7 +2,8 @@
 
 universe::universe()
 {
-
+    TotalTimePassed=0;
+    CountBullets=0;
 }
 //-----------------------------------------------------
 void universe::create(OvQt3DWindow *view,Qt3DCore::QEntity *rootEntity)
@@ -33,7 +34,7 @@ void universe::create(OvQt3DWindow *view,Qt3DCore::QEntity *rootEntity)
     Planet[1].Material->setAmbient(QColor(0x000044));
     Planet[1].Position=QVector3D(-100.0f, 0.0f, 0.0f);
     Planet[1].Speed=QVector3D(0.0f, 31.675f, 0.0f);
-    //Planet[1].Speed=QVector3D(0.0f, 0.0f, 0.0f);
+    Planet[1].Speed=QVector3D(0.0f, 0.0f, 0.0f);
     Planet[1].Mass=1;
     Planet[1].Transform=new Qt3DCore::QTransform();
     Planet[1].Transform->setScale(1.0f);
@@ -84,6 +85,29 @@ void universe::create(OvQt3DWindow *view,Qt3DCore::QEntity *rootEntity)
         Planet[i].Entity->addComponent(Planet[i].Transform);
     }
 
+    for(int i=0;i<MAXBULLETS;i++)
+    {
+        Bullet[i].Entity = new Qt3DCore::QEntity(rootEntity);
+        Bullet[i].Mesh = new Qt3DExtras::QSphereMesh();
+        //Bullet[i].Mesh = new Qt3DExtras::QCylinderMesh();
+        Bullet[i].Mesh->setRadius(0.3);
+        Bullet[i].Mesh->setGenerateTangents(true);
+        //Bullet[i].Mesh->setLength(0.3);
+        //Bullet[i].Mesh->setRings(5);
+        //Bullet[i].Mesh->setSlices(5);
+        Bullet[i].Material=new Qt3DExtras::QDiffuseSpecularMaterial();
+        Bullet[i].Material->setAmbient(QColor(0xffffff));
+        Bullet[i].Position=QVector3D(0.0f, 0.0f, 0.0f);
+        Bullet[i].Speed=QVector3D(0.0f, 0.0f, 0.0f);
+        Bullet[i].Transform=new Qt3DCore::QTransform();
+        Bullet[i].Transform->setScale(1.0f);
+        Bullet[i].Transform->setTranslation(Bullet[i].Position);
+        Bullet[i].Entity->addComponent(Bullet[i].Mesh);
+        Bullet[i].Entity->addComponent(Bullet[i].Material);
+        Bullet[i].Entity->addComponent(Bullet[i].Transform);
+        Bullet[i].Active=0;
+    }
+
     // Camera
     Player.Entity = view->camera();
     Player.Position=(QVector3D(0.0f, 0.0f, 500.0f));
@@ -126,20 +150,38 @@ void universe::create(OvQt3DWindow *view,Qt3DCore::QEntity *rootEntity)
     text->addComponent(textTransform);
 }
 //-----------------------------------------------------
+void universe::Bullet_Launch(double TotalTimePassed)
+{
+    double TimePassed=TotalTimePassed-LastShootTime;
+
+    if (TimePassed > 0.1)
+    if (CountBullets<MAXBULLETS)
+    {
+        int bidx=CountBullets++;
+        Bullet[bidx].Position=Player.Position;
+        Bullet[bidx].Speed=Player.ViewDir*(Player.Speed+100);
+        Bullet[bidx].Active=1;
+        LastShootTime=TotalTimePassed;
+    }
+
+}
+//-----------------------------------------------------
 void universe::render(float dt)
 {
+    TotalTimePassed+=dt;
+
     //float G=6.673e-11;
     float G=1.0f;
     QVector3D Force;
 
     //Calculate force on planet according to gravity and resulting acceleration
     for(int i=0;i<MAXPLANETS;i++)
-    //if (i!=0 && i!=2)
+    if (i!=0 && i!=2)
     {
         Force=QVector3D(0,0,0);
         for(int j=0;j<MAXPLANETS;j++)
         if (j!=i)
-        //if (j!=0 && j!=2)
+        if (j!=0 && j!=2)
         {
             QVector3D V_distance=Planet[j].Position-Planet[i].Position;
             float distance=V_distance.length();
@@ -159,6 +201,20 @@ void universe::render(float dt)
         Planet[i].Speed+=Planet[i].Acc*dt;
         Planet[i].Position+=Planet[i].Speed*dt;
         Planet[i].Transform->setTranslation(Planet[i].Position);
+    }
+
+    //Calculate and update positions
+    for(int i=0;i<MAXBULLETS;i++)
+    if( Bullet[i].Active>0)
+    {
+        Bullet[i].Position+=Bullet[i].Speed*dt;
+        Bullet[i].Transform->setTranslation(Bullet[i].Position);
+    }
+
+    if(view->Player_Shoot==1)
+    {
+        Bullet_Launch(TotalTimePassed);
+        view->Player_Shoot=0;
     }
 
     // set light according to "sun"

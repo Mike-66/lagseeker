@@ -16,6 +16,7 @@ public:
 
     int Player_Controll;
     int Player_Accelerate;
+    int Player_Shoot;
     int Player_MouseX;
     int Player_MouseY;
 

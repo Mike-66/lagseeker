@@ -28,6 +28,8 @@
 
 
 #define MAXPLANETS 4
+#define MAXBULLETS 500
+
 //------------------------------------------
 struct s_Sphere {
     Qt3DCore::QEntity *Entity;
@@ -52,6 +54,16 @@ struct s_Player {
     float     Mass;
 };
 //------------------------------------------
+struct s_Bullet {
+    Qt3DCore::QEntity *Entity;
+    Qt3DExtras::QSphereMesh *Mesh;
+    Qt3DExtras::QDiffuseSpecularMaterial *Material;
+    Qt3DCore::QTransform *Transform;
+    QVector3D Position;
+    QVector3D Speed;
+    int       Active;
+};
+//------------------------------------------
 class universe: public QObject
 {
 public:
@@ -66,6 +78,13 @@ public:
     Qt3DExtras::QExtrudedTextMesh *textMesh;
 
     OvQt3DWindow *view;
+
+    double TotalTimePassed;
+
+    unsigned CountBullets;
+    double   LastShootTime;
+    s_Bullet Bullet[MAXBULLETS] ;
+    void Bullet_Launch(double TotalTimePassed);
 
     void create(OvQt3DWindow *view,Qt3DCore::QEntity *rootEntity);
 
