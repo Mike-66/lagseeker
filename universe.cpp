@@ -33,7 +33,7 @@ void universe::create(OvQt3DWindow *view,Qt3DCore::QEntity *rootEntity)
     Planet[1].Material->setAmbient(QColor(0x000044));
     Planet[1].Position=QVector3D(-100.0f, 0.0f, 0.0f);
     Planet[1].Speed=QVector3D(0.0f, 31.675f, 0.0f);
-    //Planet[1].Speed=QVector3D(0.0f, 35.0f, 0.0f);
+    //Planet[1].Speed=QVector3D(0.0f, 0.0f, 0.0f);
     Planet[1].Mass=1;
     Planet[1].Transform=new Qt3DCore::QTransform();
     Planet[1].Transform->setScale(1.0f);
@@ -57,9 +57,23 @@ void universe::create(OvQt3DWindow *view,Qt3DCore::QEntity *rootEntity)
 
     Planet[2].Mass=0.001;
     Planet[2].Transform=new Qt3DCore::QTransform();
-    Planet[2].Transform->setScale(1.3f);
+    Planet[2].Transform->setScale(1.0f);
     Planet[2].Transform->setTranslation(Planet[2].Position);
     /**/
+
+    Planet[3].Entity = new Qt3DCore::QEntity(rootEntity);
+    Planet[3].Mesh = new Qt3DExtras::QSphereMesh;
+    Planet[3].Mesh->setRadius(0.3);
+    Planet[3].Mesh->setGenerateTangents(true);
+    Planet[3].Material=new Qt3DExtras::QDiffuseSpecularMaterial();
+    Planet[3].Material->setAmbient(QColor(0x444444));
+    Planet[3].Position=QVector3D(-3.0f, 0.0f, 0.0f)+Planet[1].Position;
+    Planet[3].Speed=QVector3D(0.f, 0.5f, 0.0f)+Planet[1].Speed;
+    Planet[3].Mass=0.01;
+    Planet[3].Transform=new Qt3DCore::QTransform();
+    Planet[3].Transform->setScale(1.0f);
+    Planet[3].Transform->setTranslation(Planet[1].Position);
+
 
     for(int i=0;i<MAXPLANETS;i++)
     {
@@ -120,10 +134,12 @@ void universe::render(float dt)
 
     //Calculate force on planet according to gravity and resulting acceleration
     for(int i=0;i<MAXPLANETS;i++)
+    //if (i!=0 && i!=2)
     {
         Force=QVector3D(0,0,0);
         for(int j=0;j<MAXPLANETS;j++)
         if (j!=i)
+        //if (j!=0 && j!=2)
         {
             QVector3D V_distance=Planet[j].Position-Planet[i].Position;
             float distance=V_distance.length();
@@ -179,7 +195,7 @@ void universe::render(float dt)
     Player.Entity->setUpVector(Player.UpDir);
     Player.Entity->setViewCenter(Player.ViewCenter);
 
-    QVector3D V_distance=Planet[0].Position-Planet[2].Position;
+    QVector3D V_distance=Planet[1].Position-Planet[2].Position;
     textMesh->setText(QString::number(V_distance.length()));
     //textMesh->setText(QString::number(view->Player_Accelerate ));
     //textMesh->setText(QString::number(y_due));

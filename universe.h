@@ -27,7 +27,7 @@
 #include "ovqt3dwindow.h"
 
 
-#define MAXPLANETS 3
+#define MAXPLANETS 4
 //------------------------------------------
 struct s_Sphere {
     Qt3DCore::QEntity *Entity;
