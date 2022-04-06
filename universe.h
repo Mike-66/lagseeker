@@ -27,8 +27,11 @@
 #include "ovqt3dwindow.h"
 
 
-#define MAXPLANETS 4
-#define MAXBULLETS 500
+#define MAXPLANETS         4
+#define MAXBULLETS       150
+#define BULLET_INTERVALL 0.1
+#define BULLET_LIFETIME   10
+#define BULLET_SPEED     250
 
 //------------------------------------------
 struct s_Sphere {
@@ -56,12 +59,12 @@ struct s_Player {
 //------------------------------------------
 struct s_Bullet {
     Qt3DCore::QEntity *Entity;
-    Qt3DExtras::QSphereMesh *Mesh;
+    Qt3DExtras::QCylinderMesh *Mesh;
     Qt3DExtras::QDiffuseSpecularMaterial *Material;
     Qt3DCore::QTransform *Transform;
     QVector3D Position;
     QVector3D Speed;
-    int       Active;
+    double    ShootTime;
 };
 //------------------------------------------
 class universe: public QObject
@@ -78,13 +81,17 @@ public:
     Qt3DExtras::QExtrudedTextMesh *textMesh;
 
     OvQt3DWindow *view;
+    Qt3DCore::QEntity *rootEntity;
 
     double TotalTimePassed;
 
     unsigned CountBullets;
     double   LastShootTime;
+    int      NextBullet;
     s_Bullet Bullet[MAXBULLETS] ;
+    void Bullet_Create(QVector3D position, Qt3DCore::QEntity *rootEntity, int idx);
     void Bullet_Launch(double TotalTimePassed);
+    void Bullet_Delete(int idx);
 
     void create(OvQt3DWindow *view,Qt3DCore::QEntity *rootEntity);
 

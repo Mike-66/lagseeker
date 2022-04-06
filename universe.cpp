@@ -4,11 +4,13 @@ universe::universe()
 {
     TotalTimePassed=0;
     CountBullets=0;
+    NextBullet=0;
 }
 //-----------------------------------------------------
 void universe::create(OvQt3DWindow *view,Qt3DCore::QEntity *rootEntity)
 {
     this->view=view;
+    this->rootEntity=rootEntity;
     // BackGround
     view->defaultFrameGraph()->setClearColor(QColor(QRgb(0x00000)));
 
@@ -85,29 +87,6 @@ void universe::create(OvQt3DWindow *view,Qt3DCore::QEntity *rootEntity)
         Planet[i].Entity->addComponent(Planet[i].Transform);
     }
 
-    for(int i=0;i<MAXBULLETS;i++)
-    {
-        Bullet[i].Entity = new Qt3DCore::QEntity(rootEntity);
-        Bullet[i].Mesh = new Qt3DExtras::QSphereMesh();
-        //Bullet[i].Mesh = new Qt3DExtras::QCylinderMesh();
-        Bullet[i].Mesh->setRadius(0.3);
-        Bullet[i].Mesh->setGenerateTangents(true);
-        //Bullet[i].Mesh->setLength(0.3);
-        //Bullet[i].Mesh->setRings(5);
-        //Bullet[i].Mesh->setSlices(5);
-        Bullet[i].Material=new Qt3DExtras::QDiffuseSpecularMaterial();
-        Bullet[i].Material->setAmbient(QColor(0xffffff));
-        Bullet[i].Position=QVector3D(0.0f, 0.0f, 0.0f);
-        Bullet[i].Speed=QVector3D(0.0f, 0.0f, 0.0f);
-        Bullet[i].Transform=new Qt3DCore::QTransform();
-        Bullet[i].Transform->setScale(1.0f);
-        Bullet[i].Transform->setTranslation(Bullet[i].Position);
-        Bullet[i].Entity->addComponent(Bullet[i].Mesh);
-        Bullet[i].Entity->addComponent(Bullet[i].Material);
-        Bullet[i].Entity->addComponent(Bullet[i].Transform);
-        Bullet[i].Active=0;
-    }
-
     // Camera
     Player.Entity = view->camera();
     Player.Position=(QVector3D(0.0f, 0.0f, 500.0f));
@@ -122,6 +101,11 @@ void universe::create(OvQt3DWindow *view,Qt3DCore::QEntity *rootEntity)
     Player.Entity->setPosition(Player.Position);
     Player.Entity->setUpVector(Player.UpDir);
     Player.Entity->setViewCenter(Player.ViewCenter);
+
+    for(int i=0;i<MAXBULLETS;i++)
+    {
+        Bullet_Create(Player.Position,rootEntity,i);
+    }
 
     Qt3DCore::QEntity *lightEntity = new Qt3DCore::QEntity(rootEntity);
     Qt3DRender::QPointLight *light = new Qt3DRender::QPointLight(lightEntity);
@@ -150,18 +134,56 @@ void universe::create(OvQt3DWindow *view,Qt3DCore::QEntity *rootEntity)
     text->addComponent(textTransform);
 }
 //-----------------------------------------------------
-void universe::Bullet_Launch(double TotalTimePassed)
+void universe::Bullet_Create(QVector3D position, Qt3DCore::QEntity *rootEntity, int idx)
 {
-    double TimePassed=TotalTimePassed-LastShootTime;
-
-    if (TimePassed > 0.1)
-    if (CountBullets<MAXBULLETS)
+    Bullet[idx].Entity = new Qt3DCore::QEntity(rootEntity);
+    Bullet[idx].Mesh = new Qt3DExtras::QCylinderMesh();
+    //Bullet[idx].Mesh = new Qt3DExtras::QCylinderMesh();
+    Bullet[idx].Mesh->setRadius(0.3);
+    Bullet[idx].Mesh->setLength(0.3);
+    //Bullet[idx].Mesh->setRings(5);
+    //Bullet[idx].Mesh->setSlices(5);
+    Bullet[idx].Material=new Qt3DExtras::QDiffuseSpecularMaterial();
+    Bullet[idx].Material->setAmbient(QColor(0xffffff));
+    Bullet[idx].Position=position;
+    Bullet[idx].Speed=QVector3D(0.0f, 0.0f, 0.0f);
+    Bullet[idx].Transform=new Qt3DCore::QTransform();
+    Bullet[idx].Transform->setScale(1.0f);
+    Bullet[idx].Transform->setTranslation(Bullet[idx].Position);
+    Bullet[idx].Entity->addComponent(Bullet[idx].Mesh);
+    Bullet[idx].Entity->addComponent(Bullet[idx].Material);
+    Bullet[idx].Entity->addComponent(Bullet[idx].Transform);
+    Bullet[idx].ShootTime=-1;
+}
+//-----------------------------------------------------
+void universe::Bullet_Delete(int idx)
+{
+    //Bullet[idx].Entity = new Qt3DCore::QEntity(rootEntity);
+    //Bullet[idx].Mesh = new Qt3DExtras::QSphereMesh();
+    //Bullet[idx].Material=new Qt3DExtras::QDiffuseSpecularMaterial();
+    //Bullet[idx].Transform=new Qt3DCore::QTransform();
+    Bullet[idx].ShootTime=-1;
+    Bullet[idx].Entity->removeComponent(Bullet[idx].Transform);
+    Bullet[idx].Entity->removeComponent(Bullet[idx].Material);
+    Bullet[idx].Entity->removeComponent(Bullet[idx].Mesh);
+}
+//-----------------------------------------------------
+void universe::Bullet_Launch(double TimePassed)
+{
+    if (TimePassed > BULLET_INTERVALL)
+    if ( Bullet[NextBullet].ShootTime < 0 )
     {
-        int bidx=CountBullets++;
-        Bullet[bidx].Position=Player.Position;
-        Bullet[bidx].Speed=Player.ViewDir*(Player.Speed+100);
-        Bullet[bidx].Active=1;
+        Bullet[NextBullet].Entity->addComponent(Bullet[NextBullet].Mesh);
+        Bullet[NextBullet].Entity->addComponent(Bullet[NextBullet].Material);
+        Bullet[NextBullet].Entity->addComponent(Bullet[NextBullet].Transform);
+        Bullet[NextBullet].Position=Player.Position;
+        Bullet[NextBullet].Speed=Player.ViewDir*(Player.Speed+BULLET_SPEED);
+        Bullet[NextBullet].ShootTime=TotalTimePassed;
         LastShootTime=TotalTimePassed;
+        NextBullet++;
+        if(NextBullet>=MAXBULLETS)
+        NextBullet=0;
+
     }
 
 }
@@ -205,15 +227,17 @@ void universe::render(float dt)
 
     //Calculate and update positions
     for(int i=0;i<MAXBULLETS;i++)
-    if( Bullet[i].Active>0)
+    if( Bullet[i].ShootTime>0)
     {
         Bullet[i].Position+=Bullet[i].Speed*dt;
         Bullet[i].Transform->setTranslation(Bullet[i].Position);
+        if(  (TotalTimePassed-Bullet[i].ShootTime) > BULLET_LIFETIME)
+        Bullet_Delete(i);
     }
 
     if(view->Player_Shoot==1)
     {
-        Bullet_Launch(TotalTimePassed);
+        Bullet_Launch(TotalTimePassed-LastShootTime);
         view->Player_Shoot=0;
     }
 
