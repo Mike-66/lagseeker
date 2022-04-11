@@ -12,7 +12,8 @@ OvQt3DWindow::OvQt3DWindow(QGuiApplication *app): Qt3DExtras::Qt3DWindow()
 //-----------------------------------------------------------------
 void OvQt3DWindow::keyPressEvent(QKeyEvent *event)
 {
-    //std::cout<< event->key() << std::endl;
+
+    std::cout<< ++number <<" PRESSED " << event->key() << std::endl;
 
     switch (event->key())
     {
@@ -39,12 +40,13 @@ void OvQt3DWindow::keyPressEvent(QKeyEvent *event)
 //-----------------------------------------------------------------
 void OvQt3DWindow::keyReleaseEvent(QKeyEvent *event)
 {
-    //std::cout<< event->key() << std::endl;
+    std::cout<< ++number <<" RELEASED " << event->key() << std::endl;
 
     switch (event->key())
     {
         case Qt::Key_W:Player_Accelerate=0;break;
         case Qt::Key_S:Player_Accelerate=0;break;
+        case Qt::Key_Space:Player_Shoot=0;break;
     }
 }
 //-----------------------------------------------------------------
