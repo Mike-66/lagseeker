@@ -47,22 +47,25 @@ void TBullets::Move(float dt)
     LastShootTimePassed+=dt;
 }
 //-------------------------------------------------------
-void TBullets::Shoot(QVector3D position,QVector3D direction,float speed)
+int TBullets::Shoot(QVector3D position,QVector3D direction,float speed)
 {
     if (LastShootTimePassed <  BULLET_INTERVALL)
-    return;
+    return(0);
     LastShootTimePassed=0;
     if (Bullet[NextBullet].Age >= BULLET_AGE_SEPARATOR )
-    return;
+    return(0);
     Bullet[NextBullet].Entity->addComponent(Bullet[NextBullet].Mesh);
     Bullet[NextBullet].Entity->addComponent(Bullet[NextBullet].Material);
     Bullet[NextBullet].Entity->addComponent(Bullet[NextBullet].Transform);
     Bullet[NextBullet].Position=position;
     Bullet[NextBullet].Speed=direction*(speed+BULLET_SPEED);
     Bullet[NextBullet].Age=BULLET_AGE_RUNNING;
+
     NextBullet++;
     if(NextBullet>=MAXBULLETS)
     NextBullet=0;
+
+    return(1);
 }
 //-------------------------------------------------------
 void TBullets::Delete(int idx)

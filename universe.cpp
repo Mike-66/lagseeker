@@ -52,9 +52,15 @@ void universe::render(float dt)
     Player.Move(view->Player_Controll,
                 Player.GetDue(view->width(),view->Player_MouseX),Player.GetDue(view->height(),view->Player_MouseY),
                 view->Player_Accelerate, dt);
-    if(view->Player_Shoot==1)
-    Bullets.Shoot(Player.Player.Position,Player.Player.ViewDir,Player.Player.Speed);
     Bullets.Move(dt);
+    if(view->Player_Shoot==1)
+    if(Bullets.Shoot(Player.Player.Position+Player.Gun_Muzzle[Player.Gun_Muzzle_Idx],Player.Player.ViewDir,Player.Player.Speed))
+    {
+        Player.Gun_Muzzle_Idx++;
+        if(Player.Gun_Muzzle_Idx>=GUN_MUZZLES)
+        Player.Gun_Muzzle_Idx=0;
+    }
+
 
     // set light according to "sun"
     lightTransform->setTranslation(Planets.Planet[0].Position);

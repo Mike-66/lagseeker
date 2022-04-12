@@ -21,9 +21,12 @@ public:
     TPlayer();
     s_Player Player;
 
+    QVector3D Gun_Muzzle[GUN_MUZZLES];
+    int       Gun_Muzzle_Idx;
 
     void Create(Qt3DRender::QCamera *camera);
     float GetDue(int range, int position);
+    void Shoot(void);
     void Move(int controll,float x_due, float y_due, int accellerate, float dt);
 
 };

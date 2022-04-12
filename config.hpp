@@ -22,13 +22,14 @@
 #include <Qt3DExtras/QExtrudedTextMesh>
 #include <QtMath>
 
-#define MAXPLANETS         4
-#define MAXBULLETS        50
-#define BULLET_INTERVALL 0.01
-#define BULLET_AGE_FREE  -1.0f
+#define MAXPLANETS            4
+#define MAXBULLETS          500
+#define BULLET_INTERVALL      0.2
+#define BULLET_AGE_FREE      -1.0f
 #define BULLET_AGE_SEPARATOR -0.1f
-#define BULLET_AGE_RUNNING 0.0f
-#define BULLET_LIFETIME   10
-#define BULLET_SPEED     100
+#define BULLET_AGE_RUNNING    0.0f
+#define BULLET_LIFETIME      10
+#define BULLET_SPEED        100
+#define GUN_MUZZLES           4
 
 #endif // CONFIG_HPP

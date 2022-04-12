@@ -24,9 +24,10 @@ public:
     double   LastShootTimePassed;
     int      NextBullet;
     s_Bullet Bullet[MAXBULLETS] ;
+
     void Create(Qt3DCore::QEntity *rootEntity);
     void Move(float dt);
-    void Shoot(QVector3D position,QVector3D direction,float speed);
+    int  Shoot(QVector3D position,QVector3D direction,float speed);
     void Delete(int idx);
 
 };
